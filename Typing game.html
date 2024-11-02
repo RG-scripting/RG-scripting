@@ -63,10 +63,6 @@
             margin-top: 20px;
         }
     </style>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 </head>
 <body>
     <h1>100 Sentence Typing Challenge</h1>
@@ -87,8 +83,7 @@
         <br>
         <button id="exitOwnerMenu">Exit Owner Menu</button>
         <div id="deleteEntry">
-            <input type="text" id="deleteUsername" placeholder="Enter username to delete">
-            <button id="deleteButton">Delete User</button>
+            <button id="removeUserButton">Remove User</button>
         </div>
     </div>
 
@@ -98,25 +93,128 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBLbjZ3PVBfvdDOBZmfm6wYaICfXKP8qq8",
-            authDomain: "typing-697d6.firebaseapp.com",
-            projectId: "typing-697d6",
-            storageBucket: "typing-697d6.appspot.com",
-            messagingSenderId: "298067010134",
-            appId: "1:298067010134:web:9894abf29e8e9d7f4191f7",
-            measurementId: "G-RDE93DG7HH"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
         const sentences = [
             "The quick brown fox jumps over the lazy dog.",
             "A journey of a thousand miles begins with a single step.",
-            // ... (other sentences)
-            "You only live once, but if you do it right, once is enough."
+            "To be or not to be, that is the question.",
+            "All that glitters is not gold.",
+            "A penny saved is a penny earned.",
+            "Actions speak louder than words.",
+            "Beauty is in the eye of the beholder.",
+            "Better late than never.",
+            "Birds of a feather flock together.",
+            "Cleanliness is next to godliness.",
+            "Do not count your chickens before they hatch.",
+            "Don't bite the hand that feeds you.",
+            "Don't put all your eggs in one basket.",
+            "Every cloud has a silver lining.",
+            "Fortune favors the bold.",
+            "Good things come to those who wait.",
+            "Honesty is the best policy.",
+            "If it ain't broke, don't fix it.",
+            "If you can't stand the heat, get out of the kitchen.",
+            "It's no use crying over spilled milk.",
+            "Jack of all trades, master of none.",
+            "Knowledge is power.",
+            "Laughter is the best medicine.",
+            "Let sleeping dogs lie.",
+            "Like father, like son.",
+            "Money doesn't grow on trees.",
+            "No man is an island.",
+            "Practice makes perfect.",
+            "Rome wasn't built in a day.",
+            "Slow and steady wins the race.",
+            "The apple doesn't fall far from the tree.",
+            "The early bird catches the worm.",
+            "The grass is always greener on the other side.",
+            "The pen is mightier than the sword.",
+            "The road to hell is paved with good intentions.",
+            "There's no place like home.",
+            "Time and tide wait for no man.",
+            "What goes around comes around.",
+            "When in Rome, do as the Romans do.",
+            "You can't have your cake and eat it too.",
+            "You can't judge a book by its cover.",
+            "You reap what you sow.",
+            "Absence makes the heart grow fonder.",
+            "Actions have consequences.",
+            "All good things must come to an end.",
+            "An ounce of prevention is worth a pound of cure.",
+            "Beggars can't be choosers.",
+            "Blood is thicker than water.",
+            "Brevity is the soul of wit.",
+            "Clean your room before you complain about the world.",
+            "Curiosity killed the cat.",
+            "Every rose has its thorn.",
+            "Familiarity breeds contempt.",
+            "Good fences make good neighbors.",
+            "Hope for the best, prepare for the worst.",
+            "If you want something done right, do it yourself.",
+            "It takes two to tango.",
+            "Knowledge speaks, but wisdom listens.",
+            "Let the cat out of the bag.",
+            "Love conquers all.",
+            "Misery loves company.",
+            "No pain, no gain.",
+            "One man's trash is another man's treasure.",
+            "Opportunity knocks but once.",
+            "Out of sight, out of mind.",
+            "Pride comes before a fall.",
+            "Roses are red, violets are blue.",
+            "Silence is golden.",
+            "The best things in life are free.",
+            "The devil is in the details.",
+            "The grass is always greener on the other side.",
+            "The more things change, the more they stay the same.",
+            "There's no time like the present.",
+            "To err is human, to forgive divine.",
+            "Two heads are better than one.",
+            "Variety is the spice of life.",
+            "When life gives you lemons, make lemonade.",
+            "You can't make an omelet without breaking eggs.",
+            "You can't teach an old dog new tricks.",
+            "Your guess is as good as mine.",
+            "A watched pot never boils.",
+            "A bird in the hand is worth two in the bush.",
+            "A fool and his money are soon parted.",
+            "A house divided against itself cannot stand.",
+            "A picture is worth a thousand words.",
+            "All's fair in love and war.",
+            "As you sow, so shall you reap.",
+            "Better safe than sorry.",
+            "Cleanliness is next to godliness.",
+            "Don't put off until tomorrow what you can do today.",
+            "Don't throw the baby out with the bathwater.",
+            "Every dog has its day.",
+            "Fools rush in where angels fear to tread.",
+            "Great minds think alike.",
+            "Haste makes waste.",
+            "If the shoe fits, wear it.",
+            "If you can't beat them, join them.",
+            "Imitation is the sincerest form of flattery.",
+            "It’s the thought that counts.",
+            "Jack be nimble, Jack be quick.",
+            "Knowledge is power.",
+            "Last but not least.",
+            "Like two peas in a pod.",
+            "Money talks.",
+            "Never look a gift horse in the mouth.",
+            "Old habits die hard.",
+            "Practice what you preach.",
+            "Rain on my parade.",
+            "Seeing is believing.",
+            "Spare the rod and spoil the child.",
+            "The ball is in your court.",
+            "The calm before the storm.",
+            "The proof is in the pudding.",
+            "The tides of change.",
+            "There's no such thing as a free lunch.",
+            "Throw caution to the wind.",
+            "Turn over a new leaf.",
+            "Two wrongs don't make a right.",
+            "When the going gets tough, the tough get going.",
+            "You can't always get what you want.",
+            "You can't please everyone."
         ];
 
         let currentSentenceIndex = 0;
@@ -128,128 +226,178 @@
         const topTimes = [];
         const topTimesKey = 'topTimes';
 
-        // Load top times from Firebase when the page is loaded
-        function loadTopTimes() {
-            database.ref('scores/').once('value', (snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    const score = childSnapshot.val();
-                    topTimes.push(score);
-                });
-                updateLeaderboardDisplay();
-            });
+        async function loadLeaderboard() {
+            const response = await fetch('http://localhost:3000/leaderboard');
+            const data = await response.json();
+            data.forEach(entry => topTimes.push(entry));
+            updateLeaderboardDisplay();
         }
 
-        // Save top times to Firebase
-        function saveTopTimes() {
-            topTimes.forEach(user => {
-                database.ref('scores/').push(user);
+        async function postLeaderboardEntry(name, time) {
+            await fetch('http://localhost:3000/leaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, time })
             });
         }
 
         const sentenceElement = document.getElementById('sentence');
         const inputElement = document.getElementById('input');
-        const resultElement = document.getElementById('result');
         const outputElement = document.getElementById('output');
+        const resultElement = document.getElementById('result');
         const startButton = document.getElementById('startButton');
         const restartButton = document.getElementById('restartButton');
         const ownerMenu = document.getElementById('ownerMenu');
-        const exitOwnerMenu = document.getElementById('exitOwnerMenu');
-        const autocorrectToggle = document.getElementById('autocorrectToggle');
-        const deleteButton = document.getElementById('deleteButton');
-        const deleteUsernameInput = document.getElementById('deleteUsername');
-        const minimizeButton = document.getElementById('minimizeButton');
-        let isMinimized = false;
+        const removeUserButton = document.getElementById('removeUserButton');
+        const exitOwnerMenuButton = document.getElementById('exitOwnerMenu');
 
         startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', restartGame);
-        exitOwnerMenu.addEventListener('click', exitOwnerMode);
-        autocorrectToggle.addEventListener('change', toggleAutocorrect);
-        deleteButton.addEventListener('click', deleteUser);
-        minimizeButton.addEventListener('click', toggleMinimize);
-        
-        document.addEventListener('keydown', handleKeyPress);
         inputElement.addEventListener('input', checkInput);
+        restartButton.addEventListener('click', restartGame);
+        removeUserButton.addEventListener('click', promptForUsernameToRemove);
+        exitOwnerMenuButton.addEventListener('click', exitOwnerMode);
+        document.getElementById('minimizeButton').addEventListener('click', toggleMinimize);
 
         function startGame() {
-            if (!userName) {
-                userName = prompt("Please enter your real name:");
-                if (!userName) {
-                    alert("You must enter a name to play!");
-                    return;
-                }
-            }
-            
-            currentSentenceIndex = 0;
-            startTime = Date.now();
-            resultElement.textContent = '';
+            currentSentenceIndex = Math.floor(Math.random() * sentences.length);
+            sentenceElement.textContent = sentences[currentSentenceIndex];
             inputElement.value = '';
-            outputElement.textContent = '';
             inputElement.disabled = false;
-            startButton.style.display = 'none';
-            restartButton.style.display = 'none';
-            displayNextSentence();
+            inputElement.focus();
+            startTime = Date.now();
             updateTime();
-        }
-
-        function displayNextSentence() {
-            if (currentSentenceIndex < sentences.length) {
-                sentenceElement.textContent = sentences[currentSentenceIndex];
-                inputElement.focus();
-                outputElement.textContent = ''; // Clear output on new sentence
-            } else {
-                endGame();
-            }
+            restartButton.style.display = 'none';
+            resultElement.textContent = '';
+            outputElement.textContent = '';
         }
 
         function checkInput() {
             const userInput = inputElement.value;
             const currentSentence = sentences[currentSentenceIndex];
 
-            // Handle owner mode
-            if (ownerMode) {
-                if (autocorrectEnabled) {
-                    autocorrectInput(userInput, currentSentence);
-                }
+            if (autocorrectEnabled) {
+                const correctText = currentSentence.slice(0, userInput.length);
+                const correct = userInput === correctText;
 
-                // Check if user input matches the current sentence or ends with a full stop
-                if (userInput === currentSentence || (userInput.endsWith('.') && userInput.slice(0, -1) === currentSentence)) {
-                    currentSentenceIndex++;
-                    inputElement.value = ''; // Clear input for next sentence
-                    displayNextSentence(); // Move to the next sentence
-                }
-                return;
-            }
-
-            // Check each character typed
-            outputElement.textContent = ''; // Clear previous output
-            for (let i = 0; i < userInput.length; i++) {
-                if (i < currentSentence.length) {
-                    const char = userInput[i];
-                    if (char === currentSentence[i]) {
-                        outputElement.innerHTML += `<span class="correct">${char}</span>`;
-                    } else {
-                        outputElement.innerHTML += `<span class="incorrect">${char}</span>`;
-                    }
+                outputElement.textContent = correct ? '' : 'Incorrect input!';
+                if (!correct) {
+                    inputElement.classList.add('incorrect');
+                } else {
+                    inputElement.classList.remove('incorrect');
                 }
             }
 
-            // Check if user input matches the current sentence
             if (userInput === currentSentence) {
-                currentSentenceIndex++;
-                inputElement.value = ''; // Clear input for next sentence
-                displayNextSentence(); // Move to the next sentence
+                endGame();
             }
-
-            // Highlight correct and incorrect characters directly in the input field
-            highlightInput(userInput, currentSentence);
         }
 
-        function autocorrectInput(userInput, currentSentence) {
-            const maxLength = currentSentence.length - 1; // Allow typing the full stop at the end
-            const correctedInput = Array.from(userInput).map((char, index) => {
-                if (index < maxLength) {
-                    return char === currentSentence[index] ? char : currentSentence[index];
-                }
-                return char; // Allow typing the last character (full stop)
-            }).join('');
+        function endGame() {
+            clearInterval(timeInterval);
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            resultElement.textContent = `Time: ${timeTaken} seconds`;
+            userName = prompt("Enter your username:");
+            if (userName) {
+                postLeaderboardEntry(userName, timeTaken);
+                topTimes.push({ name: userName, time: timeTaken });
+                topTimes.sort((a, b) => a.time - b.time);
+                updateLeaderboardDisplay();
+            }
+            restartButton.style.display = 'inline';
+            inputElement.disabled = true;
+        }
 
+        function updateLeaderboardDisplay() {
+            const timesList = document.getElementById('timesList');
+            timesList.innerHTML = '';
+            topTimes.forEach(user => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${user.name}: ${user.time} seconds`;
+                timesList.appendChild(listItem);
+            });
+        }
+
+        function promptForUsernameToRemove() {
+            const password = prompt("Enter password to remove a user:");
+            if (password === "lauReli5") {
+                const usernameToRemove = prompt("Enter the username to remove from the leaderboard:");
+                if (usernameToRemove) {
+                    const response = fetch(`http://localhost:3000/leaderboard/${usernameToRemove}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        const index = topTimes.findIndex(user => user.name === usernameToRemove);
+                        if (index !== -1) {
+                            topTimes.splice(index, 1);
+                            alert(`${usernameToRemove} has been removed from the leaderboard.`);
+                            updateLeaderboardDisplay();
+                        } else {
+                            alert(`User ${usernameToRemove} not found.`);
+                        }
+                    } else {
+                        alert("Failed to remove user.");
+                    }
+                } else {
+                    alert("No username entered.");
+                }
+            } else {
+                alert("Incorrect password.");
+            }
+        }
+
+        function restartGame() {
+            inputElement.value = '';
+            resultElement.textContent = '';
+            outputElement.textContent = '';
+            startButton.style.display = 'inline';
+            restartButton.style.display = 'none';
+            sentenceElement.textContent = '';
+            inputElement.disabled = true;
+            ownerMode = false;
+            ownerMenu.style.display = 'none';
+            clearInterval(timeInterval);
+            userName = "";
+        }
+
+        function toggleMinimize() {
+            ownerMenu.classList.toggle('minimized');
+        }
+
+        function dragMouseDown(e) {
+            e.preventDefault();
+            let pos1 = e.clientX;
+            let pos2 = e.clientY;
+
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+
+            function elementDrag(e) {
+                e.preventDefault();
+                let pos3 = pos1 - e.clientX;
+                let pos4 = pos2 - e.clientY;
+                pos1 = e.clientX;
+                pos2 = e.clientY;
+                ownerMenu.style.top = (ownerMenu.offsetTop - pos4) + "px";
+                ownerMenu.style.left = (ownerMenu.offsetLeft - pos3) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        ownerMenu.addEventListener('mousedown', dragMouseDown);
+        window.onload = loadLeaderboard();
+
+        function updateTime() {
+            timeInterval = setInterval(() => {
+                // Update game time if needed
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

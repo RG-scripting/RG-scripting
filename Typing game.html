@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #sentence {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        #input {
+            font-size: 20px;
+            width: 80%;
+            padding: 10px;
+        }
+        #output {
+            font-size: 20px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+        }
+        #startButton, #restartButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        #ownerMenu {
+            display: none;
+            position: absolute;
+            border: 1px solid #ccc;
+            background-color: white;
+            padding: 10px;
+            width: 300px;
+            z-index: 1000;
+        }
+        .minimized {
+            height: 40px;
+            overflow: hidden;
+        }
+        .key-pressed {
+            animation: keypress-effect 0.2s ease;
+        }
+        @keyframes keypress-effect {
+            0% { background-color: rgba(0, 255, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+        #topTimes {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>100 Sentence Typing Challenge</h1>
+    <div id="sentence"></div>
+    <input type="text" id="input" placeholder="Start typing..." autofocus>
+    <br>
+    <button id="startButton">Start Game</button>
+    <button id="restartButton" style="display:none;">Restart Game</button>
+    <div id="result"></div>
+    <div id="output"></div>
+
+    <div id="ownerMenu" class="draggable">
+        <h2>Owner Menu <button id="minimizeButton">_</button></h2>
+        <label>
+            <input type="checkbox" id="autocorrectToggle" checked>
+            Enable Auto-Correct
+        </label>
+        <br>
+        <button id="exitOwnerMenu">Exit Owner Menu</button>
+        <div id="deleteEntry">
+            <input type="text" id="deleteUsername" placeholder="Enter username to delete">
+            <button id="deleteButton">Delete User</button>
+        </div>
+    </div>
+
+    <div id="topTimes">
+        <h2>Top Times</h2>
+        <ul id="timesList"></ul>
+    </div>
+
+    <script>
+        const sentences = [
+            "The quick brown fox jumps over the lazy dog.",
+            "A journey of a thousand miles begins with a single step.",
+            "To be or not to be, that is the question.",
+            "All that glitters is not gold.",
+            "In the end, we will remember not the words of our enemies, but the silence of our friends.",
+            "Life is either a daring adventure or nothing at all.",
+            "It does not matter how slowly you go as long as you do not stop.",
+            "The only limit to our realization of tomorrow is our doubts of today.",
+            "What lies behind us and what lies before us are tiny matters compared to what lies within us.",
+            "You miss 100% of the shots you don’t take.",
+            "The greatest glory in living lies not in never falling, but in rising every time we fall.",
+            "The future belongs to those who believe in the beauty of their dreams.",
+            "It is during our darkest moments that we must focus to see the light.",
+            "Do not wait to strike till the iron is hot, but make it hot by striking.",
+            "Success is not the key to happiness. Happiness is the key to success.",
+            "You have to be odd to be number one.",
+            "What we think, we become.",
+            "Life is really simple, but we insist on making it complicated.",
+            "In three words I can sum up everything I've learned about life: it goes on.",
+            "You only live once, but if you do it right, once is enough."
+        ];
+
+        let currentSentenceIndex = 0;
+        let startTime;
+        let ownerMode = false;
+        let autocorrectEnabled = true;
+        let timeInterval;
+        let userName = "";
+        const topTimes = [];
+        const topTimesKey = 'topTimes';
+
+        // Load top times from local storage when the page is loaded
+        function loadTopTimes() {
+            const storedTimes = localStorage.getItem(topTimesKey);
+            if (storedTimes) {
+                topTimes.push(...JSON.parse(storedTimes));
+            }
+            updateLeaderboardDisplay();
+        }
+
+        // Save top times to local storage
+        function saveTopTimes() {
+            localStorage.setItem(topTimesKey, JSON.stringify(topTimes));
+        }
+
+        const sentenceElement = document.getElementById('sentence');
+        const inputElement = document.getElementById('input');
+        const resultElement = document.getElementById('result');
+        const outputElement = document.getElementById('output');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const ownerMenu = document.getElementById('ownerMenu');
+        const exitOwnerMenu = document.getElementById('exitOwnerMenu');
+        const autocorrectToggle = document.getElementById('autocorrectToggle');
+        const deleteButton = document.getElementById('deleteButton');
+        const deleteUsernameInput = document.getElementById('deleteUsername');
+        const minimizeButton = document.getElementById('minimizeButton');
+        let isMinimized = false;
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+        exitOwnerMenu.addEventListener('click', exitOwnerMode);
+        autocorrectToggle.addEventListener('change', toggleAutocorrect);
+        deleteButton.addEventListener('click', deleteUser);
+        minimizeButton.addEventListener('click', toggleMinimize);
+        
+        document.addEventListener('keydown', handleKeyPress);
+        inputElement.addEventListener('input', checkInput);
+
+        function startGame() {
+            if (!userName) {
+                userName = prompt("Please enter your real name:");
+                if (!userName) {
+                    alert("You must enter a name to play!");
+                    return;
+                }
+            }
+            
+            currentSentenceIndex = 0;
+            startTime = Date.now();
+            resultElement.textContent = '';
+            inputElement.value = '';
+            outputElement.textContent = '';
+            inputElement.disabled = false;
+            startButton.style.display = 'none';
+            restartButton.style.display = 'none';
+            displayNextSentence();
+            updateTime();
+        }
+
+        function displayNextSentence() {
+            if (currentSentenceIndex < sentences.length) {
+                sentenceElement.textContent = sentences[currentSentenceIndex];
+                inputElement.focus();
+                outputElement.textContent = ''; // Clear output on new sentence
+            } else {
+                endGame();
+            }
+        }
+
+        function checkInput() {
+            const userInput = inputElement.value;
+            const currentSentence = sentences[currentSentenceIndex];
+
+            // Handle owner mode
+            if (ownerMode) {
+                if (autocorrectEnabled) {
+                    autocorrectInput(userInput, currentSentence);
+                }
+
+                // Check if user input matches the current sentence or ends with a full stop
+                if (userInput === currentSentence || (userInput.endsWith('.') && userInput.slice(0, -1) === currentSentence)) {
+                    currentSentenceIndex++;
+                    inputElement.value = ''; // Clear input for next sentence
+                    displayNextSentence(); // Move to the next sentence
+                }
+                return;
+            }
+
+            // Check each character typed
+            outputElement.textContent = ''; // Clear previous output
+            for (let i = 0; i < userInput.length; i++) {
+                if (i < currentSentence.length) {
+                    const char = userInput[i];
+                    if (char === currentSentence[i]) {
+                        outputElement.innerHTML += `<span class="correct">${char}</span>`;
+                    } else {
+                        outputElement.innerHTML += `<span class="incorrect">${char}</span>`;
+                    }
+                }
+            }
+
+            // Check if user input matches the current sentence
+            if (userInput === currentSentence) {
+                currentSentenceIndex++;
+                inputElement.value = ''; // Clear input for next sentence
+                displayNextSentence(); // Move to the next sentence
+            }
+
+            // Highlight correct and incorrect characters directly in the input field
+            highlightInput(userInput, currentSentence);
+        }
+
+        function autocorrectInput(userInput, currentSentence) {
+            const maxLength = currentSentence.length - 1; // Allow typing the full stop at the end
+            const correctedInput = Array.from(userInput).map((char, index) => {
+                if (index < maxLength) {
+                    return char === currentSentence[index] ? char : currentSentence[index];
+                }
+                return char; // Allow typing the last character (full stop)
+            }).join('');
+
+            // Prevent typing past the second-to-last character unless it is a full stop
+            if (correctedInput.length <= maxLength + 1 && !(userInput.length > maxLength + 1 && !userInput.endsWith('.'))) {
+                inputElement.value = correctedInput; // Update the input with corrected text
+                inputElement.setSelectionRange(correctedInput.length, correctedInput.length); // Move cursor to the end
+            }
+        }
+
+        function highlightInput(userInput, currentSentence) {
+            const highlightedInput = Array.from(userInput).map((char, index) => {
+                if (index < currentSentence.length) {
+                    return char === currentSentence[index]
+                        ? `<span class="correct">${char}</span>`
+                        : `<span class="incorrect">${char}</span>`;
+                }
+                return `<span class="incorrect">${char}</span>`;
+            }).join('');
+
+            outputElement.innerHTML = highlightedInput;
+        }
+
+        function handleKeyPress(event) {
+            inputElement.classList.add('key-pressed');
+            setTimeout(() => inputElement.classList.remove('key-pressed'), 200);
+
+            if (event.ctrlKey && event.key === ';') {
+                event.preventDefault(); // Prevent default action
+                promptForPassword();
+            }
+        }
+
+        function promptForPassword() {
+            const password = prompt("Enter password:");
+            if (password === "lauReli5") {
+                enterOwnerMode();
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        function enterOwnerMode() {
+            ownerMode = true;
+            ownerMenu.style.display = 'block';
+            inputElement.disabled = false;
+            inputElement.value = ''; // Clear input for owner mode
+            sentenceElement.textContent = ''; // Clear sentence for owner mode
+            outputElement.textContent = ''; // Clear output for owner mode
+        }
+
+        function toggleAutocorrect() {
+            autocorrectEnabled = autocorrectToggle.checked;
+        }
+
+        function exitOwnerMode() {
+            ownerMode = false;
+            ownerMenu.style.display = 'none';
+            restartGame(); // Restart the game when exiting owner mode
+        }
+
+        function deleteUser() {
+            const usernameToDelete = deleteUsernameInput.value.trim();
+            if (usernameToDelete) {
+                const index = topTimes.findIndex(user => user.name === usernameToDelete);
+                if (index !== -1) {
+                    topTimes.splice(index, 1);
+                    alert(`${usernameToDelete} has been deleted from the leaderboard.`);
+                    deleteUsernameInput.value = ''; // Clear input
+                    saveTopTimes(); // Save changes to local storage
+                    updateLeaderboardDisplay();
+                } else {
+                    alert(`User ${usernameToDelete} not found.`);
+                }
+            } else {
+                alert("Please enter a username to delete.");
+            }
+        }
+
+        function endGame() {
+            clearInterval(timeInterval); // Stop the timer
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            resultElement.textContent = `Time: ${timeTaken} seconds`;
+            topTimes.push({ name: userName, time: timeTaken });
+            topTimes.sort((a, b) => a.time - b.time);
+            saveTopTimes(); // Save to local storage
+            updateLeaderboardDisplay();
+            restartButton.style.display = 'inline';
+            inputElement.disabled = true;
+        }
+
+        function updateLeaderboardDisplay() {
+            const timesList = document.getElementById('timesList');
+            timesList.innerHTML = ''; // Clear previous list
+            topTimes.forEach(user => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${user.name}: ${user.time} seconds`;
+                timesList.appendChild(listItem);
+            });
+        }
+
+        function restartGame() {
+            inputElement.value = '';
+            resultElement.textContent = '';
+            outputElement.textContent = '';
+            startButton.style.display = 'inline';
+            restartButton.style.display = 'none';
+            sentenceElement.textContent = '';
+            inputElement.disabled = true;
+            ownerMode = false; // Reset owner mode
+            ownerMenu.style.display = 'none'; // Hide owner menu
+            clearInterval(timeInterval); // Clear the timer
+            userName = ""; // Reset username
+        }
+
+        function toggleMinimize() {
+            if (isMinimized) {
+                ownerMenu.classList.remove('minimized');
+            } else {
+                ownerMenu.classList.add('minimized');
+            }
+            isMinimized = !isMinimized;
+        }
+
+        function dragMouseDown(e) {
+            e.preventDefault();
+            let pos1 = e.clientX;
+            let pos2 = e.clientY;
+
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+
+            function elementDrag(e) {
+                e.preventDefault();
+                let pos3 = pos1 - e.clientX;
+                let pos4 = pos2 - e.clientY;
+                pos1 = e.clientX;
+                pos2 = e.clientY;
+                ownerMenu.style.top = (ownerMenu.offsetTop - pos4) + "px";
+                ownerMenu.style.left = (ownerMenu.offsetLeft - pos3) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        ownerMenu.addEventListener('mousedown', dragMouseDown);
+        window.onload = loadTopTimes;
+
+        function updateTime() {
+            timeInterval = setInterval(() => {
+                // Update game time if needed
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
